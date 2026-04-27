@@ -1,6 +1,8 @@
 # Commit staged and unstaged changes
 
-Run a full **git commit workflow** for this workspace **without asking the user to confirm** each step. Only stop and ask if there is **nothing to commit** or the changes are **ambiguous** (unrelated work mixed in one diff).
+Run a full **local `git commit` workflow** for this workspace **without asking the user to confirm** each step. Only stop and ask if there is **nothing to commit** or the changes are **ambiguous** (unrelated work mixed in one diff).
+
+**Scope:** this command **never** touches the remote. It **must not** run `git push`, even if the user’s message is long or mentions publishing—**push is only when they run `/push` themselves.**
 
 ## Before you start
 
@@ -25,8 +27,9 @@ Run a full **git commit workflow** for this workspace **without asking the user 
 ## Do not
 
 - Do **not** amend or force-push unless the user explicitly asked for that in the same turn.
-- Do **not** `git push` in this command (this command is **commit only**). Use **`/push`** to publish commits.
+- Do **not** run `git push` (or any remote update: `git pull`, `git fetch` for publishing). **Stop after commit**; do not ask “should I push?” unless the user explicitly asked about push in that message.
+- The user publishes manually with **`/push`** when they want—**never** combine push into this flow.
 
 ## Related
 
-- **`/push`** — push the current branch to `origin` after you have commits locally.
+- **`/push`** — separate command; only run when the user invokes **`/push`**, not after **`/commit`**.
