@@ -6,7 +6,7 @@
 | **file** | `git-push.md` |
 | **description** | Push the current branch to `origin` (set upstream if missing). Never force-push unless explicitly requested. |
 
-**Filename:** use the **lowercase category slug** as prefix — for Git, `git-` — then the command id: `git-<id>.md`.
+Authoring rules: `.cursor/rules/cursor-slash-commands.mdc`.
 
 # Push current branch to remote
 

@@ -6,7 +6,7 @@
 | **file** | `git-commit.md` |
 | **description** | Stage changes, craft compliant commit message(s), and create local git commit(s) without pushing. |
 
-**Filename:** use the **lowercase category slug** as prefix — for Git, `git-` — then the command id: `git-<id>.md`.
+Authoring rules: `.cursor/rules/cursor-slash-commands.mdc`.
 
 # Commit staged and unstaged changes
 

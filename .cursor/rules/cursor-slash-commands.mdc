@@ -1,0 +1,38 @@
+---
+description: Authoring Cursor slash commands under .cursor/commands (metadata table, filenames).
+alwaysApply: true
+---
+
+# Cursor slash commands (this repo)
+
+When **adding or editing** files in `.cursor/commands/`, follow all of the below.
+
+## Required metadata block (top of file)
+
+Start the file with this **markdown table** (same columns, same order):
+
+| Field | Value |
+| --- | --- |
+| **name** | Slash trigger, e.g. `/git-commit` |
+| **id** | Stable id, kebab-case; normally equals the filename stem (no `.md`) |
+| **category** | Short group label, e.g. `Git` |
+| **file** | Exact filename, e.g. `git-commit.md` |
+| **description** | One line: what runs, inputs/outputs implied, hard limits (e.g. no push) |
+
+Rules:
+
+- **name** must match what users type after `/` for this file (same as Cursor’s command name for that file).
+- **file** must match the real filename on disk.
+- **id** should match the filename stem unless you document a deliberate exception.
+
+## Filename = category slug + command slug
+
+- Pick a **category slug**: lowercase ASCII, no spaces (e.g. category `Git` → `git`).
+- Pick a **command slug**: kebab-case (e.g. `commit`, `push`).
+- **Filename:** `{categorySlug}-{commandSlug}.md` (example: `git-commit.md`, `git-push.md`).
+- For a new category, use its slug the same way (e.g. `docs` → `docs-setup.md`).
+
+## Body content
+
+- After the table, use clear headings and numbered steps (same tone as existing `git-commit` / `git-push` commands).
+- Cross-link related commands by **name** (e.g. `/git-push`), not only by filename.
