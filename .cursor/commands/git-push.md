@@ -34,3 +34,5 @@ Run **`git push`** for this workspace **without asking the user to confirm** eac
 ## Related
 
 - Use **`/git-commit`** to create commits first; use **`/git-push`** to publish them.
+- If you may be behind **`origin`**, run **`/git-pull`** before **`/git-push`**.
+- **`/git-branch`** — create a new local branch before commits that should not land on **`main`** yet.
