@@ -3,13 +3,16 @@
 | **name** | `/git-commit` |
 | **id** | `git-commit` |
 | **category** | Git |
+| **file** | `git-commit.md` |
 | **description** | Stage changes, craft compliant commit message(s), and create local git commit(s) without pushing. |
+
+**Filename:** use the **lowercase category slug** as prefix — for Git, `git-` — then the command id: `git-<id>.md`.
 
 # Commit staged and unstaged changes
 
 Run a full **local `git commit` workflow** for this workspace **without asking the user to confirm** each step. Only stop and ask if there is **nothing to commit** or the changes are **ambiguous** (unrelated work mixed in one diff).
 
-**Scope:** this command **never** touches the remote. It **must not** run `git push`, even if the user’s message is long or mentions publishing—**push is only when they run `/push` themselves.**
+**Scope:** this command **never** touches the remote. It **must not** run `git push`, even if the user’s message is long or mentions publishing—**push is only when they run `/git-push` themselves.**
 
 ## Before you start
 
@@ -35,8 +38,8 @@ Run a full **local `git commit` workflow** for this workspace **without asking t
 
 - Do **not** amend or force-push unless the user explicitly asked for that in the same turn.
 - Do **not** run `git push` (or any remote update: `git pull`, `git fetch` for publishing). **Stop after commit**; do not ask “should I push?” unless the user explicitly asked about push in that message.
-- The user publishes manually with **`/push`** when they want—**never** combine push into this flow.
+- The user publishes manually with **`/git-push`** when they want—**never** combine push into this flow.
 
 ## Related
 
-- **`/push`** — separate command; only run when the user invokes **`/push`**, not after **`/git-commit`**.
+- **`/git-push`** — separate command; only run when the user invokes **`/git-push`**, not after **`/git-commit`**.

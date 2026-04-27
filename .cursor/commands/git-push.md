@@ -1,9 +1,12 @@
 | Field | Value |
 | --- | --- |
-| **name** | `/push` |
-| **id** | `push` |
+| **name** | `/git-push` |
+| **id** | `git-push` |
 | **category** | Git |
+| **file** | `git-push.md` |
 | **description** | Push the current branch to `origin` (set upstream if missing). Never force-push unless explicitly requested. |
+
+**Filename:** use the **lowercase category slug** as prefix — for Git, `git-` — then the command id: `git-<id>.md`.
 
 # Push current branch to remote
 
@@ -30,4 +33,4 @@ Run **`git push`** for this workspace **without asking the user to confirm** eac
 
 ## Related
 
-- Use **`/git-commit`** to create commits first; use **`/push`** to publish them.
+- Use **`/git-commit`** to create commits first; use **`/git-push`** to publish them.
