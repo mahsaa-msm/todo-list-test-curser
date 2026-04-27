@@ -43,3 +43,4 @@ Run a full **local `git commit` workflow** for this workspace **without asking t
 ## Related
 
 - **`/git-push`** — separate command; only run when the user invokes **`/git-push`**, not after **`/git-commit`**.
+- **`/git-pull`** — update the current branch from **`origin`** when you want to sync (this command does **not** run pull).
