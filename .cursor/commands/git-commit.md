@@ -1,3 +1,10 @@
+| Field | Value |
+| --- | --- |
+| **name** | `/git-commit` |
+| **id** | `git-commit` |
+| **category** | Git |
+| **description** | Stage changes, craft compliant commit message(s), and create local git commit(s) without pushing. |
+
 # Commit staged and unstaged changes
 
 Run a full **local `git commit` workflow** for this workspace **without asking the user to confirm** each step. Only stop and ask if there is **nothing to commit** or the changes are **ambiguous** (unrelated work mixed in one diff).
@@ -32,4 +39,4 @@ Run a full **local `git commit` workflow** for this workspace **without asking t
 
 ## Related
 
-- **`/push`** — separate command; only run when the user invokes **`/push`**, not after **`/commit`**.
+- **`/push`** — separate command; only run when the user invokes **`/push`**, not after **`/git-commit`**.

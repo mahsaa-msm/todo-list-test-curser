@@ -1,3 +1,10 @@
+| Field | Value |
+| --- | --- |
+| **name** | `/push` |
+| **id** | `push` |
+| **category** | Git |
+| **description** | Push the current branch to `origin` (set upstream if missing). Never force-push unless explicitly requested. |
+
 # Push current branch to remote
 
 Run **`git push`** for this workspace **without asking the user to confirm** each step. Only stop and ask if the situation is **blocked or unsafe** (no `origin`, diverged history needing merge/rebase, auth failure you cannot fix in-tool).
@@ -6,7 +13,7 @@ Run **`git push`** for this workspace **without asking the user to confirm** eac
 
 - Prefer the tracked upstream: `git push` when `branch...origin/branch` is already configured.
 - If there is **no upstream** yet, set it once: `git push -u origin <current-branch>` (discover branch with `git branch --show-current`).
-- Follow the same professionalism as `.cursor/commands/commit.md` (clear status, short summary).
+- Follow the same professionalism as `.cursor/commands/git-commit.md` (clear status, short summary).
 
 ## Steps (execute in order)
 
@@ -23,4 +30,4 @@ Run **`git push`** for this workspace **without asking the user to confirm** eac
 
 ## Related
 
-- Use **`/commit`** to create commits first; use **`/push`** to publish them.
+- Use **`/git-commit`** to create commits first; use **`/push`** to publish them.
