@@ -38,3 +38,4 @@ Run **`git pull`** for this workspace **without asking the user to confirm** eac
 
 - **`/git-commit`** — after resolving conflicts from a pull.
 - **`/git-push`** — publish local commits; consider **`/git-pull`** first if you may be behind `origin`.
+- **`/git-branch`** — branch off an updated **`main`** after **`/git-pull`** on that branch if you use long-lived base branches.
