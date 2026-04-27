@@ -13,7 +13,7 @@ Run a full **git commit workflow** for this workspace **without asking the user 
 2. If the working tree is clean, reply briefly that there is nothing to commit and stop.
 3. Stage what belongs together: `git add -A` **or** narrower paths if that avoids mixing unrelated edits.
 4. Write the commit message:
-   - Format: `type(optional-scope): short summary` (see allowed types in `git-commit-rule.mdc`).
+   - Format: (see allowed types in `git-commit-rule.mdc`).
    - Summary: imperative, no trailing period, max ~72 chars for the first line.
 5. Create the commit:
    - **Windows PowerShell**: do **not** use `git commit -m "type(scope): ..."` with **double quotes** if the message contains `(scope)`—PowerShell treats `(scope)` as a subexpression. Use either:
@@ -25,4 +25,8 @@ Run a full **git commit workflow** for this workspace **without asking the user 
 ## Do not
 
 - Do **not** amend or force-push unless the user explicitly asked for that in the same turn.
-- Do **not** `git push` unless the user asked for push in the same message (this command is **commit only**).
+- Do **not** `git push` in this command (this command is **commit only**). Use **`/push`** to publish commits.
+
+## Related
+
+- **`/push`** — push the current branch to `origin` after you have commits locally.
