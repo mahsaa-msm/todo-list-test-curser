@@ -1,4 +1,6 @@
 ---
+description: Enforce conventional commit messages
+globs: ["**/*"]
 alwaysApply: true
 ---
 
