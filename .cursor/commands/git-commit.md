@@ -16,7 +16,11 @@ Run a full **local `git commit` workflow** for this workspace **without asking t
 
 ## Before you start
 
-- Follow project commit rules in `.cursor/rules/git-commit-rule.mdc` (**Conventional Commits**).
+- Commit message must follow **Conventional Commits**:
+  - Format: `type(optional-scope): short summary`
+  - Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+  - Summary rules: imperative mood, max ~72 chars, no trailing period, avoid starting with uppercase unless it is a proper noun
+  - If body exists, add one blank line after summary
 - Prefer **one logical commit** per invocation; if the working tree clearly mixes unrelated changes, split into two commits **without** waiting for the user—use your judgment from `git diff`.
 
 ## Steps (execute in order)
@@ -25,7 +29,8 @@ Run a full **local `git commit` workflow** for this workspace **without asking t
 2. If the working tree is clean, reply briefly that there is nothing to commit and stop.
 3. Stage what belongs together: `git add -A` **or** narrower paths if that avoids mixing unrelated edits.
 4. Write the commit message:
-   - Format: (see allowed types in `git-commit-rule.mdc`).
+   - Format: `type(optional-scope): short summary`
+   - Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
    - Summary: imperative, no trailing period, max ~72 chars for the first line.
 5. Create the commit:
    - **Windows PowerShell**: do **not** use `git commit -m "type(scope): ..."` with **double quotes** if the message contains `(scope)`—PowerShell treats `(scope)` as a subexpression. Use either:
