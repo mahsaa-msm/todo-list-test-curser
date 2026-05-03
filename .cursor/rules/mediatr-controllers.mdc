@@ -5,35 +5,54 @@ alwaysApply: true
 
 # Rule: MediatR and controller boundaries
 
-CQRS flows go through **MediatR**: each use case is a **Command** or **Query** with a matching handler (naming aligns with `.cursor/rules/cqrs-project-structure.mdc`: `*Command`/`*CommandHandler`, `*Query`/`*QueryHandler`).
+CQRS flows go through **MediatR**: each use case is a **Command** or **Query** with a matching handler (names align with `.cursor/rules/cqrs-project-structure.mdc`: `*Command`/`*CommandHandler`, `*Query`/`*QueryHandler`).
+
+### Commands & queries in the **boundary** assembly
+
+Often a dedicated **Contracts** (or similarly named) project holds **both** HTTP/OpenAPI-facing shapes **and** `IRequest` / `IRequest<T>` messages: one type per use case, consumed by Endpoint (`[FromBody]`, route/query binding) **`mediator.Send`**, and by Application **handlers** — no duplicate message type alongside a separate `*Request` unless your team deliberately splits transport from application messaging.
+
+Response models (`*Dto`, `*Response`) usually live in that same boundary layer beside the slice.
 
 ## Controllers (Api / EndPoint)
 
-- Controllers **map HTTP only**. Do not embed use-case or persistence logic in actions.
-- **Forbidden in controllers:** `DbContext`, `Microsoft.EntityFrameworkCore`, `IAppDbContext`, raw `DbSet` access, LINQ `.Where()`/`.ToListAsync()` against EF, or `SaveChanges` orchestration from the controller.
+- Controllers **map HTTP only**. Do not embed use-case orchestration or persistence in actions beyond binding and `Send`.
+- **Forbidden in controllers:** EF `DbContext`, ORM fluent API usage, persistence interfaces used for querying/saving, raw data-access calls, `SaveChanges` orchestration — those belong behind MediatR handlers (or infra used by handlers).
+
+*(Adjust the forbidden list if you use another stack; the invariant is **no persistence in controllers**.)*
+
+### Route + body
+
+When part of the state comes from the path and part from JSON, deserialize the body into your message type then **merge route values once** (e.g. `command with { Id = routeId }`) before `Send` — keeps a single canonical message shape for handlers.
 
 ## Where persistence belongs
 
-Handlers in Application (or Infra adapters they use) own `IAppDbContext`/persistence—not controllers.
+Handlers in Application (or infrastructure adapters invoked by handlers) own data access—not controllers.
 
-## Examples
+## Examples (generic)
 
 ```csharp
-// ✅ GOOD — controller sends a query/command
-public async Task<IActionResult> GetMyTodos(CancellationToken ct)
+// ✅ GOOD — message from boundary assembly as body + Send (when your architecture allows it)
+public async Task<IActionResult> Create([FromBody] SubmitEnvelopeCommand command, CancellationToken ct)
 {
-    var result = await mediator.Send(new GetMyTodosQuery(), ct);
-    return Ok(result);
+    var id = await mediator.Send(command, ct);
+    return Created($"{Request.Path}/{id}", value: id);
+}
+
+// ✅ GOOD — parameterless query
+public async Task<IActionResult> ListMine(CancellationToken ct)
+{
+    var items = await mediator.Send(new ListMyItemsQuery(), ct);
+    return Ok(items);
 }
 ```
 
 ```csharp
-// ❌ BAD — direct context in controller (e.g. TodosController anti-pattern)
-var todos = await dbContext.Todos.Where(...).ToListAsync(ct);
+// ❌ BAD — querying EF (or equivalent) directly in an action
+var rows = await dbContext.Items.Where(...).ToListAsync(ct);
 ```
 
-FluentValidation may stay in controllers for request bodies or run in MediatR pipeline behaviors; either is fine **as long as** DB access stays in handlers.
+FluentValidation may live at Endpoint (on the boundary types) or in the MediatR pipeline; DB access stays in handlers regardless.
 
 ## Typical controller dependencies
 
-`IMediator`, HTTP-only helpers like `ICurrentUserService`, and validators if configured at the API layer—**not** database abstractions used for querying or saving entities.
+`IMediator`, HTTP-only primitives (routing, authorization, **optional** “current user” / correlation services), validators—**not** types whose job is querying or updating persistent store.

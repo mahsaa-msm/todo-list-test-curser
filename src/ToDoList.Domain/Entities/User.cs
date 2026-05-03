@@ -2,40 +2,30 @@ namespace ToDoList.Domain.Entities;
 
 public sealed class User
 {
-    public const int UsernameMaxLength = 100;
-
-    public int Id { get; private set; }
-    public string Username { get; private set; } = string.Empty;
-    public string PasswordHash { get; private set; } = string.Empty;
-
-    public List<TodoItem> Todos { get; private set; } = [];
-
+#pragma warning disable CS8618
     private User()
     {
+        // EF Core
     }
+#pragma warning restore CS8618
 
-    public static User Create(string username, string passwordHash)
+    public int Id { get; private set; }
+
+    public string Username { get; private set; } = "";
+
+    public string PasswordHash { get; private set; } = "";
+
+    public ICollection<Todo> Todos { get; private set; } = new List<Todo>();
+
+    public static User Register(string username, string passwordHash)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(username);
         ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
-
-        username = RequireValidUsername(username);
 
         return new User
         {
-            Username = username,
-            PasswordHash = passwordHash
+            Username = username.Trim(),
+            PasswordHash = passwordHash,
         };
-    }
-
-    private static string RequireValidUsername(string username)
-    {
-        if (string.IsNullOrWhiteSpace(username))
-            throw new ArgumentException("Username is required.", nameof(username));
-
-        username = username.Trim();
-        if (username.Length > UsernameMaxLength)
-            throw new ArgumentException($"Username must be at most {UsernameMaxLength} characters.", nameof(username));
-
-        return username;
     }
 }

@@ -1,0 +1,21 @@
+---
+description: Keep .cursor/rules product-agnostic so they transfer to other solutions
+alwaysApply: true
+---
+
+# Rule: Portable workspace rules
+
+These files under `.cursor/rules/` are meant to describe **patterns and boundaries**, not a specific product (“todos”, “orders”, …) or **this solution’s assemblies** unless the whole team treats that wording as placeholders.
+
+## Must
+
+- Prefer **abstract placeholders**: `{SolutionName}`, `{Feature}`, `{Area}`, `*Command`, `*Query`, `*Dto`, fictional examples (`SubmitEnvelopeCommand`, `ListItemsQuery`).
+- When showing code, use **neutral sample names** — not domain types from one pet project.
+- Tie rules to **layering and tooling** (MediatR, EF, FluentValidation, controller limits), not business vocabulary.
+
+## Avoid
+
+- Hard-coding **this repo’s** entity names, route shapes, or `Company.Product.*` namespaces in always-applied rules.
+- Examples that imply a fixed feature set (“Auth/Todos/GetMine”) as if they apply everywhere — use `{Area}/{UseCase}` instead.
+
+Related layering detail: `.cursor/rules/cqrs-project-structure.mdc`, `.cursor/rules/mediatr-controllers.mdc`.

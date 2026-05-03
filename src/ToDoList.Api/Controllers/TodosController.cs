@@ -1,60 +1,52 @@
-using FluentValidation;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using ToDoList.Application.Contracts.Todos;
-using ToDoList.Application.Todos.Commands;
-using ToDoList.Application.Todos.Queries;
-
-namespace ToDoList.Api.Controllers;
-
-[ApiController]
-[Authorize]
-[Route("api/[controller]")]
-public sealed class TodosController(
-    IMediator mediator,
-    IValidator<CreateTodoRequest> createValidator,
-    IValidator<UpdateTodoStatusRequest> updateValidator) : ControllerBase
-{
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateTodoRequest request, CancellationToken cancellationToken)
-    {
-        await createValidator.ValidateAndThrowAsync(request, cancellationToken);
-        var created = await mediator.Send(new CreateTodoCommand(request), cancellationToken);
-        return CreatedAtAction(nameof(GetMyTodos), new { id = created.Id }, created);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> GetMyTodos(CancellationToken cancellationToken)
-    {
-        var todos = await mediator.Send(new GetMyTodosQuery(), cancellationToken);
-        return Ok(todos);
-    }
-
-    [HttpPatch("{id:int}/status")]
-    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateTodoStatusRequest request, CancellationToken cancellationToken)
-    {
-        await updateValidator.ValidateAndThrowAsync(request, cancellationToken);
-        var result = await mediator.Send(new UpdateTodoStatusCommand(id, request), cancellationToken);
-        return result switch
-        {
-            TodoMutationResult.Succeeded => NoContent(),
-            TodoMutationResult.NotFound => NotFound(),
-            TodoMutationResult.Forbidden => Forbid(),
-            _ => Problem(statusCode: StatusCodes.Status500InternalServerError)
-        };
-    }
-
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
-    {
-        var result = await mediator.Send(new DeleteTodoCommand(id), cancellationToken);
-        return result switch
-        {
-            TodoMutationResult.Succeeded => NoContent(),
-            TodoMutationResult.NotFound => NotFound(),
-            TodoMutationResult.Forbidden => Forbid(),
-            _ => Problem(statusCode: StatusCodes.Status500InternalServerError)
-        };
-    }
-}
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ToDoList.Contracts.Todos.Commands.Create;
+using ToDoList.Contracts.Todos.Commands.Delete;
+using ToDoList.Contracts.Todos.Commands.UpdateStatus;
+using ToDoList.Contracts.Todos.Queries.GetMine;
+
+namespace ToDoList.Api.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/todos")]
+public sealed class TodosController(IMediator mediator) : ControllerBase
+{
+    [HttpPost]
+    [ProducesResponseType(typeof(CreateTodoDto), StatusCodes.Status201Created)]
+    public async Task<IActionResult> Create([FromBody] CreateTodoCommand command, CancellationToken ct)
+    {
+        var id = await mediator.Send(command, ct);
+        var location = $"{Request.Path}/{id}";
+        return Created(location, new CreateTodoDto { Id = id });
+    }
+
+    [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<TodoDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<TodoDto>>> ListMine(CancellationToken ct)
+    {
+        var items = await mediator.Send(new GetMyTodosQuery(), ct);
+        return Ok(items);
+    }
+
+    [HttpPatch("{id:int}/status")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateTodoStatusCommand command, CancellationToken ct)
+    {
+        await mediator.Send(command with { TodoId = id }, ct);
+        return Ok();
+    }
+
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    {
+        await mediator.Send(new DeleteTodoCommand(id), ct);
+        return NoContent();
+    }
+}

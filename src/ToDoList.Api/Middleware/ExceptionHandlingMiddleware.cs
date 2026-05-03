@@ -1,43 +1,80 @@
-using System.Net;
+using System.Net.Mime;
 using System.Text.Json;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+using ToDoList.Application.Common;
+using ToDoList.Contracts.Common;
 
 namespace ToDoList.Api.Middleware;
 
-public sealed class ExceptionHandlingMiddleware(RequestDelegate next)
+public sealed class ExceptionHandlingMiddleware
 {
-    public async Task InvokeAsync(HttpContext context)
+    private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+    private readonly IHostEnvironment _environment;
+    private readonly JsonSerializerOptions _jsonOptions;
+
+    public ExceptionHandlingMiddleware(
+        RequestDelegate next,
+        ILogger<ExceptionHandlingMiddleware> logger,
+        IHostEnvironment environment)
+    {
+        _next = next;
+        _logger = logger;
+        _environment = environment;
+        _jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = environment.IsDevelopment(),
+        };
+    }
+
+    public async Task Invoke(HttpContext httpContext)
     {
         try
         {
-            await next(context);
+            await _next(httpContext);
         }
-        catch (ValidationException ex)
+        catch (AppException ex)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            await WriteJsonAsync(context, new { message = "Validation failed", errors = ex.Errors.Select(x => x.ErrorMessage) });
+            await WriteResponse(httpContext, StatusFor(ex), Map(ex));
         }
-        catch (DbUpdateException ex)
+        catch (Exception ex)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.Conflict;
-            await WriteJsonAsync(context, new { message = "Database conflict", detail = ex.InnerException?.Message ?? ex.Message });
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-            await WriteJsonAsync(context, new { message = ex.Message });
-        }
-        catch (Exception)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            await WriteJsonAsync(context, new { message = "Unexpected server error" });
+            _logger.LogError(ex, "Unhandled exception.");
+            await WriteResponse(
+                httpContext,
+                StatusCodes.Status500InternalServerError,
+                new ApiErrorResponse
+                {
+                    Code = "INTERNAL_ERROR",
+                    Message = "An unexpected error occurred.",
+                    Details = _environment.IsDevelopment() ? ex.Message : null,
+                });
         }
     }
 
-    private static Task WriteJsonAsync(HttpContext context, object payload)
+    private static ApiErrorResponse Map(AppException ex) =>
+        new()
+        {
+            Code = ex.Code,
+            Message = ex.Message,
+        };
+
+    private static int StatusFor(AppException ex) =>
+        ex switch
+        {
+            ConflictAppException => StatusCodes.Status409Conflict,
+            NotFoundAppException => StatusCodes.Status404NotFound,
+            ForbiddenAppException => StatusCodes.Status403Forbidden,
+            UnauthorizedAppException => StatusCodes.Status401Unauthorized,
+            _ => StatusCodes.Status500InternalServerError,
+        };
+
+    private Task WriteResponse(HttpContext httpContext, int statusCode, ApiErrorResponse body)
     {
-        context.Response.ContentType = "application/json";
-        return context.Response.WriteAsync(JsonSerializer.Serialize(payload));
+        httpContext.Response.StatusCode = statusCode;
+        httpContext.Response.ContentType = MediaTypeNames.Application.Json;
+        return JsonSerializer.SerializeAsync(httpContext.Response.Body, body, _jsonOptions);
     }
 }

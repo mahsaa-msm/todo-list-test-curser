@@ -1,41 +1,32 @@
-using FluentValidation;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using ToDoList.Application.Auth.Commands;
-using ToDoList.Application.Contracts.Auth;
-
-namespace ToDoList.Api.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public sealed class AuthController(
-    IMediator mediator,
-    IValidator<RegisterRequest> registerValidator,
-    IValidator<LoginRequest> loginValidator) : ControllerBase
-{
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
-    {
-        await registerValidator.ValidateAndThrowAsync(request, cancellationToken);
-        var outcome = await mediator.Send(new RegisterCommand(request), cancellationToken);
-        return outcome switch
-        {
-            RegisterSucceeded s => CreatedAtAction(nameof(Register), new { id = s.Id }, new { s.Id, Username = s.Username }),
-            UsernameAlreadyRegistered => Conflict(new { message = "Username already exists." }),
-            _ => Problem(statusCode: StatusCodes.Status500InternalServerError)
-        };
-    }
-
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
-    {
-        await loginValidator.ValidateAndThrowAsync(request, cancellationToken);
-        var outcome = await mediator.Send(new LoginCommand(request), cancellationToken);
-        return outcome switch
-        {
-            LoginSucceeded s => Ok(new { accessToken = s.AccessToken }),
-            InvalidCredentials => Unauthorized(new { message = "Invalid credentials." }),
-            _ => Problem(statusCode: StatusCodes.Status500InternalServerError)
-        };
-    }
-}
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ToDoList.Contracts.Auth.Commands.Login;
+using ToDoList.Contracts.Auth.Commands.Register;
+
+namespace ToDoList.Api.Controllers;
+
+[ApiController]
+[Route("api/auth")]
+public sealed class AuthController(IMediator mediator) : ControllerBase
+{
+    [AllowAnonymous]
+    [HttpPost("register")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Register([FromBody] RegisterCommand command, CancellationToken ct)
+    {
+        var userId = await mediator.Send(command, ct);
+        return StatusCode(StatusCodes.Status201Created, new RegisterResponse { UserId = userId });
+    }
+
+    [AllowAnonymous]
+    [HttpPost("login")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken ct)
+    {
+        var token = await mediator.Send(command, ct);
+        return Ok(new LoginResponse { AccessToken = token });
+    }
+}

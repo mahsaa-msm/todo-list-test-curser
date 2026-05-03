@@ -1,8 +1,12 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/ToDoList.Api/ToDoList.Api.csproj" />
-    <Project Path="src/ToDoList.Application/ToDoList.Application.csproj" />
     <Project Path="src/ToDoList.Domain/ToDoList.Domain.csproj" />
+    <Project Path="src/ToDoList.Contracts/ToDoList.Contracts.csproj" />
+    <Project Path="src/ToDoList.Application/ToDoList.Application.csproj" />
     <Project Path="src/ToDoList.Infrastructure/ToDoList.Infrastructure.csproj" />
+    <Project Path="src/ToDoList.Api/ToDoList.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ToDoList.Api.Tests/ToDoList.Api.Tests.csproj" />
   </Folder>
 </Solution>
