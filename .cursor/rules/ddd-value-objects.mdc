@@ -1,0 +1,42 @@
+---
+description: Enforce Value Object usage for entity invariants
+globs: ["**/Entities/**/*.cs", "**/ValueObjects/**/*.cs"]
+alwaysApply: false
+---
+
+# Rule: Entity Invariants via Value Objects
+
+For DDD entities, do not validate primitive input directly inside entity methods when a dedicated Value Object can represent that concept.
+
+- Put business validation and normalization rules in Value Objects (e.g. `Name`, `Title`, `Email`, `Money`).
+- Entity properties should prefer Value Object types over raw primitives for domain concepts.
+- Entity methods should accept Value Objects (or create them at the application boundary), not duplicate validation logic.
+- Avoid repeated checks like `string.IsNullOrWhiteSpace(...)` across entities; centralize them in the related Value Object.
+- Keep entities focused on behavior and state transitions, not low-level primitive validation details.
+
+## Example
+
+```csharp
+// ✅ Value Object owns validation
+public sealed class ValueObjectName
+{
+    public string Value { get; }
+
+    public ValueObjectName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            throw new ArgumentException("Value is required.");
+
+        Value = value.Trim();
+    }
+}
+
+// ✅ Entity uses Value Object
+public class EntityName
+{
+    public int Id { get; private set; }
+    public ValueObjectName Name { get; private set; } = null!;
+
+    public void UpdateName(ValueObjectName name) => Name = name;
+}
+```

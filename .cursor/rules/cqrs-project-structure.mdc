@@ -1,0 +1,50 @@
+---
+description: Enforce CQRS-based project structure and layer boundaries
+alwaysApply: true
+---
+
+# Rule: CQRS Project Structure
+
+All backend changes must follow this architecture and naming:
+
+## Layers
+
+1. `01.Core`
+   - `Domain`
+   - `ApplicationService`
+   - `Contracts`
+2. `02.Infra`
+   - `CommandDb`
+   - `QueryDb`
+3. `03.EndPoint`
+
+## CQRS Rules
+
+- Separate write and read concerns.
+- `Command` handles write operations and state changes.
+- `Query` handles read operations only and must not mutate state.
+- Keep command models and query models independent when needed.
+- Do not mix command and query logic in a single handler/service.
+
+## Dependency Direction
+
+- `Domain` must be the most independent layer and must not depend on Infra/EndPoint.
+- `ApplicationService` can depend on `Domain` and `Contracts`.
+- `Infra` implements persistence details for `CommandDb` and `QueryDb`.
+- `EndPoint` is composition/root API layer and can depend on `core` and `Infra`.
+- Dependency flow must stay inward; no reverse dependency from core to Infra/EndPoint.
+
+## Placement Rules
+
+- Business rules and Domain behavior belong to `Domain`.
+- Use-case orchestration (handlers/services) belongs to `ApplicationService`.
+- DTOs/Contracts for boundaries belong to `Contracts`.
+- Write-side persistence classes go to `Infra/CommandDb`.
+- Read-side persistence/read models go to `Infra/QueryDb`.
+- HTTP/controller/minimal-api wiring belongs to `EndPoint`.
+
+## Naming Conventions
+
+- Commands: `*Command` + `*CommandHandler`
+- Queries: `*Query` + `*QueryHandler`
+- Keep folders aligned with feature + command/query split.

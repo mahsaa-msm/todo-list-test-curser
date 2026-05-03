@@ -1,0 +1,39 @@
+---
+description: MediatR for use cases; controllers must not touch persistence directly
+alwaysApply: true
+---
+
+# Rule: MediatR and controller boundaries
+
+CQRS flows go through **MediatR**: each use case is a **Command** or **Query** with a matching handler (naming aligns with `.cursor/rules/cqrs-project-structure.mdc`: `*Command`/`*CommandHandler`, `*Query`/`*QueryHandler`).
+
+## Controllers (Api / EndPoint)
+
+- Controllers **map HTTP only**. Do not embed use-case or persistence logic in actions.
+- **Forbidden in controllers:** `DbContext`, `Microsoft.EntityFrameworkCore`, `IAppDbContext`, raw `DbSet` access, LINQ `.Where()`/`.ToListAsync()` against EF, or `SaveChanges` orchestration from the controller.
+
+## Where persistence belongs
+
+Handlers in Application (or Infra adapters they use) own `IAppDbContext`/persistence—not controllers.
+
+## Examples
+
+```csharp
+// ✅ GOOD — controller sends a query/command
+public async Task<IActionResult> GetMyTodos(CancellationToken ct)
+{
+    var result = await mediator.Send(new GetMyTodosQuery(), ct);
+    return Ok(result);
+}
+```
+
+```csharp
+// ❌ BAD — direct context in controller (e.g. TodosController anti-pattern)
+var todos = await dbContext.Todos.Where(...).ToListAsync(ct);
+```
+
+FluentValidation may stay in controllers for request bodies or run in MediatR pipeline behaviors; either is fine **as long as** DB access stays in handlers.
+
+## Typical controller dependencies
+
+`IMediator`, HTTP-only helpers like `ICurrentUserService`, and validators if configured at the API layer—**not** database abstractions used for querying or saving entities.

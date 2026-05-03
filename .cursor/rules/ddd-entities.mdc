@@ -1,0 +1,38 @@
+---
+description: Enforce DDD-style Entity design with private setters
+globs: ["**/Entities/**/*.cs"]
+alwaysApply: false
+---
+
+# Rule: DDD Entity Encapsulation
+
+For Entity classes, follow DDD encapsulation principles:
+
+- Entity properties must use `private set;` (or `init;` only where truly immutable construction is intended).
+- Do not expose public setters on core domain state.
+- State changes must happen through domain methods with clear intent (e.g. `Activate()`, `Rename(name)`).
+- Validate invariants inside constructor/factory and state-changing methods.
+- Keep persistence concerns out of domain behavior.
+
+## Example
+
+```csharp
+// ✅ Good
+public class EntityName
+{
+    public int Id { get; private set; }
+    public string Name { get; private set; }
+    public bool IsActive { get; private set; }
+
+    public EntityName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name is required.");
+
+        Name = name.Trim();
+        IsActive = false;
+    }
+
+    public void Activate() => IsActive = true;
+}
+```
