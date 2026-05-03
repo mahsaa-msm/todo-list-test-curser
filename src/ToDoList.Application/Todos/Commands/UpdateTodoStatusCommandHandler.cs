@@ -16,7 +16,7 @@ public sealed class UpdateTodoStatusCommandHandler(IAppDbContext dbContext, ICur
         if (todo is null) return TodoMutationResult.NotFound;
         if (todo.UserId != userId) return TodoMutationResult.Forbidden;
 
-        todo.IsCompleted = command.Request.IsCompleted;
+        todo.SetCompletionStatus(command.Request.IsCompleted);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return TodoMutationResult.Succeeded;

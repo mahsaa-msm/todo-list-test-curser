@@ -15,7 +15,7 @@ public sealed class RegisterCommandHandler(IAppDbContext dbContext, IPasswordHas
         var exists = await dbContext.Users.AnyAsync(x => x.Username == username, cancellationToken);
         if (exists) return new UsernameAlreadyRegistered();
 
-        var user = new User { Username = username, PasswordHash = passwordHasher.Hash(command.Request.Password) };
+        var user = User.Create(username, passwordHasher.Hash(command.Request.Password));
         await dbContext.AddUserAsync(user, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 

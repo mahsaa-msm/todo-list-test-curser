@@ -12,13 +12,7 @@ public sealed class CreateTodoCommandHandler(IAppDbContext dbContext, ICurrentUs
     {
         var userId = currentUserService.UserId ?? throw new UnauthorizedAccessException("User token is missing.");
 
-        var todo = new TodoItem
-        {
-            UserId = userId,
-            Title = command.Request.Title.Trim(),
-            IsCompleted = false,
-            CreatedAt = DateTime.UtcNow
-        };
+        var todo = TodoItem.Create(userId, command.Request.Title, DateTime.UtcNow);
 
         await dbContext.AddTodoAsync(todo, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
