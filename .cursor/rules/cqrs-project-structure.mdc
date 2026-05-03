@@ -18,6 +18,7 @@ Apply this to **solution layout and dependencies**. Replace `{Solution}` with yo
 ### Responsibility split
 
 - **Domain**: entities/value objects/domain services; depends only on primitives/BCL (+ optional narrowly scoped libraries). Generally **does not** reference Application, Contracts, Infra, or Api.
+  - **Recommended layout:** `{Solution}.Domain` uses **`Common/Entities/`** for shared roots (e.g. auditable **`BaseEntity<TId>`**) and **`{Feature}/Entities/`** per slice (e.g. `Users/Entities/`, `Todos/Entities/`). Namespaces mirror paths (e.g. `{Solution}.Domain.Todos.Entities`).
 - **Application**: CQRS handlers, pipelines, app abstractions (**e.g.** `IDbContext`/`IRepository`/`IUnitOfWork` **defined here or in Domain**, implemented in Infra). **Handlers** reference boundary **Commands/Queries** by type; handlers do **not** hide parallel copies of those messages unless you deliberately split tiers.
 - **Contracts** (or equivalent): outward-facing payloads + MediatR `*Command`/`*Query` if your team follows “one shared message type”; response `*Dto`/`*Response`. Often references **MediatR** NuGet only, not other inner projects — unless you adopt shared kernel from Domain intentionally.
 - **Infra**: implements persistence/integration; references Application abstractions **and Domain** where needed; not Api.

@@ -30,21 +30,21 @@ public sealed class TodosController(IMediator mediator) : ControllerBase
         return Ok(items);
     }
 
-    [HttpPatch("{id:int}/status")]
+    [HttpPatch("{id:long}/status")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(void), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateTodoStatusCommand command, CancellationToken ct)
+    public async Task<IActionResult> UpdateStatus(long id, [FromBody] UpdateTodoStatusCommand command, CancellationToken ct)
     {
         await mediator.Send(command with { TodoId = id }, ct);
         return Ok();
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:long}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(void), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    public async Task<IActionResult> Delete(long id, CancellationToken ct)
     {
         await mediator.Send(new DeleteTodoCommand(id), ct);
         return NoContent();

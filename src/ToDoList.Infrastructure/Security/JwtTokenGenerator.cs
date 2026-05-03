@@ -13,7 +13,7 @@ public sealed class JwtTokenGenerator(IOptions<JwtOptions> jwtOptions)
 {
     private readonly JwtOptions _jwt = jwtOptions.Value;
 
-    public string CreateAccessToken(int userId, string username)
+    public string CreateAccessToken(long userId, string username)
     {
         if (string.IsNullOrWhiteSpace(_jwt.Key))
             throw new InvalidOperationException("Jwt:Key is not configured.");

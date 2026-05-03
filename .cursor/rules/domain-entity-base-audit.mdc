@@ -1,0 +1,81 @@
+---
+description: Generic auditable BaseEntity + SaveChanges stamping + Domain folder layout
+alwaysApply: true
+---
+
+# Rule: Auditable `BaseEntity`, infrastructure audit, and Domain layout
+
+Use this when introducing **root entities** with **primary keys** plus **Created/Updated** metadata set **at persistence time**. Aligns with `.cursor/rules/reuse-portable-rules.mdc`.
+
+## Domain project folder layout (`{Solution}.Domain`)
+
+Group by **feature / bounded-context slice**, not a flat `Entities` bucket:
+
+```
+Common/
+  Entities/
+    BaseEntity.cs               # `{Solution}.Domain.Common.Entities` — shared audited root base
+
+{TFeature}/                     # Users, Orders, Billing, …
+  Entities/
+    {Aggregate}.cs               # `{Solution}.Domain.{TFeature}.Entities`
+```
+
+Examples (replace names):
+
+```
+Users/Entities/Customer.cs
+Todos/Entities/TodoItem.cs
+```
+
+**Namespaces** mirror folders (e.g. `{Solution}.Domain.Todos.Entities`).
+
+Cross-feature navigation properties are allowed inside the Domain assembly; prefer **minimal** coupling between folders.
+
+## Domain: abstract base (`BaseEntity<TId>`)
+
+Also usable as **`EntityBase<TId>`** if a team prefers that name — keep **one** convention per repo.
+
+- **`TId Id`**, **`long? CreatedBy`**, **`DateTime CreatedAt`**, **`long? UpdatedBy`**, **`DateTime? UpdatedAt`**.
+- Prefer **`TId = long`** (or `Guid`) aligned with subjects / API identifiers.
+- **Do not** set audit fields in domain constructors / factories for normal creates — **Infrastructure** stamps them in **`SaveChanges`**.
+- **`internal set`** on **`Id`** and audit props + **`InternalsVisibleTo("{Solution}.Infrastructure")`** on Domain — no public audit setters.
+
+Concrete roots inherit **`BaseEntity<TId>`** from **`Common.Entities`**.
+
+```csharp
+// Neutral example — your feature folder: Orders/Entities/OrderLine.cs
+namespace YourSolution.Domain.Orders.Entities;
+
+public sealed class OrderLine : BaseEntity<long> { /* … */ }
+```
+
+## Application: audit user abstraction
+
+- **`IAuditUserProvider`** with **`long? GetExecutingUserId()`** — **null** when no principal (anonymous flows, tooling).
+
+## Endpoint
+
+- Scoped HTTP-based implementation registered in the host.
+
+## Infrastructure: `SaveChanges`
+
+Track **`BaseEntity<long>`** (or your audited base) entries:
+
+- **Added:** **`CreatedAt`**, **`CreatedBy`**; **`UpdatedAt`/`UpdatedBy`** unset or **`null`**.
+- **Modified:** **`UpdatedAt`**, **`UpdatedBy`**; **`CreatedAt`/`CreatedBy`** **not modified**.
+- **`Deleted`:** optional (soft-delete vs hard-delete) — team decision.
+
+See also MediatR/cqrs rules for handler boundaries — audit stays in **`DbContext`**, not controllers.
+
+## EF Core & migrations
+
+- **`ValueGeneratedOnAdd`** on **`Id`** where database-generated.
+- When **renaming** entity CLR namespaces only, update **`AppDbContextModelSnapshot`** string names or add a migration so the snapshot matches EF’s model identity.
+
+## Checklist for a **new** solution
+
+1. **`Common/Entities/BaseEntity.cs`** + **`InternalsVisibleTo`** Infrastructure.
+2. **`{Feature}/Entities/*.cs`** per aggregate; constructors **omit** audit stamps.
+3. **`IAuditUserProvider`** (Application); HTTP adapter (Api); **`ApplyAuditing`** in **`SaveChanges`** (Infrastructure).
+4. Current-user / token identifier type aligned with **`TId`** when using **`long`** everywhere.

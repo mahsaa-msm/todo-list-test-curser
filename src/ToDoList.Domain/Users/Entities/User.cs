@@ -1,6 +1,9 @@
-namespace ToDoList.Domain.Entities;
+using ToDoList.Domain.Common.Entities;
+using ToDoList.Domain.Todos.Entities;
 
-public sealed class User
+namespace ToDoList.Domain.Users.Entities;
+
+public sealed class User : BaseEntity<long>
 {
 #pragma warning disable CS8618
     private User()
@@ -8,8 +11,6 @@ public sealed class User
         // EF Core
     }
 #pragma warning restore CS8618
-
-    public int Id { get; private set; }
 
     public string Username { get; private set; } = "";
 

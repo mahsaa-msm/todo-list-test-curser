@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using ToDoList.Domain.Entities;
+using ToDoList.Domain.Todos.Entities;
+using ToDoList.Domain.Users.Entities;
 
 namespace ToDoList.Application.Abstractions;
 

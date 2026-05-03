@@ -5,8 +5,8 @@ namespace ToDoList.Api.Security;
 
 public sealed class CurrentUserService(IHttpContextAccessor accessor) : ICurrentUserService
 {
-    public int UserId =>
-        int.TryParse(
+    public long UserId =>
+        long.TryParse(
             accessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier),
             out var id)
             ? id

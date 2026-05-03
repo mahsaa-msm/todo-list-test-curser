@@ -17,6 +17,7 @@ using ToDoList.Infrastructure.Options;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ToDoList.Application.Abstractions.IAuditUserProvider, HttpContextAuditUserProvider>();
 builder.Services.AddScoped<ToDoList.Application.Abstractions.ICurrentUserService, CurrentUserService>();
 
 builder.Services.AddControllers();

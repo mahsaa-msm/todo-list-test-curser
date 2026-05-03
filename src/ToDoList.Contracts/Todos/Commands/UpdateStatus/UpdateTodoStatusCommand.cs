@@ -8,7 +8,7 @@ namespace ToDoList.Contracts.Todos.Commands.UpdateStatus;
 /// </summary>
 public sealed record UpdateTodoStatusCommand : IRequest
 {
-    public int TodoId { get; init; }
+    public long TodoId { get; init; }
 
     public bool IsCompleted { get; init; }
 }

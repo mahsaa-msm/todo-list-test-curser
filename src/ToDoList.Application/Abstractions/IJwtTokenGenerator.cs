@@ -2,5 +2,5 @@ namespace ToDoList.Application.Abstractions;
 
 public interface IJwtTokenGenerator
 {
-    string CreateAccessToken(int userId, string username);
+    string CreateAccessToken(long userId, string username);
 }

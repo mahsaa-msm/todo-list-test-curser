@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ToDoList.Domain.Entities;
+using ToDoList.Domain.Todos.Entities;
 
 namespace ToDoList.Infrastructure.Persistence.Configurations;
 
@@ -12,11 +12,14 @@ internal sealed class TodoConfiguration : IEntityTypeConfiguration<Todo>
 
         builder.HasKey(x => x.Id);
 
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
+
         builder.Property(x => x.Title).HasMaxLength(500).IsRequired();
 
         builder.Property(x => x.IsCompleted).IsRequired();
 
         builder.Property(x => x.CreatedAt).IsRequired();
+        builder.Property(x => x.UpdatedAt).IsRequired(false);
 
         builder.HasIndex(x => x.UserId);
 

@@ -25,7 +25,7 @@ namespace ToDoList.Infrastructure.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ToDoList.Domain.Entities.Todo", b =>
+            modelBuilder.Entity("ToDoList.Domain.Todos.Entities.Todo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -54,7 +54,7 @@ namespace ToDoList.Infrastructure.Persistence.Migrations
                     b.ToTable("Todos", (string)null);
                 });
 
-            modelBuilder.Entity("ToDoList.Domain.Entities.User", b =>
+            modelBuilder.Entity("ToDoList.Domain.Users.Entities.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -80,9 +80,9 @@ namespace ToDoList.Infrastructure.Persistence.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("ToDoList.Domain.Entities.Todo", b =>
+            modelBuilder.Entity("ToDoList.Domain.Todos.Entities.Todo", b =>
                 {
-                    b.HasOne("ToDoList.Domain.Entities.User", "User")
+                    b.HasOne("ToDoList.Domain.Users.Entities.User", "User")
                         .WithMany("Todos")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -91,7 +91,7 @@ namespace ToDoList.Infrastructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ToDoList.Domain.Entities.User", b =>
+            modelBuilder.Entity("ToDoList.Domain.Users.Entities.User", b =>
                 {
                     b.Navigation("Todos");
                 });

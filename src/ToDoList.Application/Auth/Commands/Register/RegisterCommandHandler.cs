@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using ToDoList.Application.Abstractions;
 using ToDoList.Application.Common;
 using ToDoList.Contracts.Auth.Commands.Register;
-using ToDoList.Domain.Entities;
+using ToDoList.Domain.Users.Entities;
 
 namespace ToDoList.Application.Auth.Commands.Register;
 
 public sealed class RegisterCommandHandler(IAppDbContext db, IPasswordHasher passwordHasher)
-    : IRequestHandler<RegisterCommand, int>
+    : IRequestHandler<RegisterCommand, long>
 {
-    public async Task<int> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<long> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var trimmed = request.Username.Trim();
         if (await db.Users.AsNoTracking().AnyAsync(u => u.Username == trimmed, cancellationToken))
